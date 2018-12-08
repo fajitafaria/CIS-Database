@@ -1,0 +1,67 @@
+CREATE TABLE IF NOT EXISTS Client (
+    ClientId          INTEGER PRIMARY KEY,
+    CompanyName       TEXT    NOT NULL,
+    CompanyAddress    TEXT    NOT NULL,
+    Phone             TEXT,
+    Email             TEXT,
+    ContractId        Integer NOT NULL
+                              REFERENCES Contract (ContractId) 
+);
+
+CREATE TABLE IF NOT EXISTS Contract (
+    ContractId        INTEGER PRIMARY KEY,
+    ContractContact   TEXT    NOT NULL,
+    ContractDetails   TEXT,
+    PaymentTerms      TEXT,
+    TaxStatus         TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Consultant (
+    ConsultantId      INTEGER PRIMARY KEY,
+    ConsultantName    TEXT    NOT NULL, 
+    ConsultantAddress TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Engagement (
+    EngagementId      INTEGER PRIMARY KEY,
+    ClientId          INTEGER NOT NULL
+                              REFERENCES Client (ClientId),
+    ConsultantId      INTEGER NOT NULL
+                              REFERENCES Consultant (ConsultantId), 
+    EngagementType    TEXT,
+    BillableTime      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Bills (
+    BillsId           INTEGER PRIMARY KEY,
+    EngagementId      INTEGER NOT NULL
+                              REFERENCES Engagement (EngagementId),
+    BillsDate         TEXT,
+    BillsAddress      TEXT    NOT NULL,
+    BillingContact    TEXT    NOT NULL,
+    PayAmount         DECIMAL NOT NULL,
+    PayDueDate        DATE
+);
+
+CREATE TABLE IF NOT EXISTS ReceivedPay (
+    ReceivedPayId  INTEGER PRIMARY KEY,
+    BillsId        INTEGER NOT NULL
+                           REFERENCES Bills (BillsId),
+    AmountReceived DECIMAL NOT NULL,
+    DateReceived   DATE
+);
+
+INSERT INTO Consultant (ConsultantId, ConsultantName, ConsultantAddress) VALUES
+('1', 'Bruce Wayne', '123 Wayne Manor'),
+('2', 'Clark Kent', '62 Metropolis'),
+('3', 'Doc Brown', '1985 Hill Valley'),
+('4', 'Freddie Mercury', '39 Queen Road'),
+('5', 'Ozzy Osbourne', 'Crazytrain St.');
+
+INSERT INTO Client (ClientId, CompanyName, CompanyAddress, Phone, Email, ContractId) VALUES 
+('201', 'ACME Corp', 'Warner Brothers Blvd', '123-1111', 'looneytunes@acme.com', '1'),
+('202', 'Brawndo', 'Idiocracy Lane', '426-3862', 'electrolytes@gmail.com', '2'),
+('203', 'Lexcorp', '333 Metropolis', '555-1945', 'lexluthor@lexcorp.org', '3'),
+('204', 'Planet Express', '3001 New New York', '255-2525', 'Proffarnsworth@gmail.com', '4'),
+('205', 'Skynet', '1997 Arnold Ave', '888-0088', 't1000@skynet.org', '5');
+
