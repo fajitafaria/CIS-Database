@@ -1,3 +1,4 @@
+--Creates The Client Table and references the Contract Table with the ContractId being the foreign key
 CREATE TABLE IF NOT EXISTS Client (
     ClientId          INTEGER PRIMARY KEY,
     CompanyName       TEXT    NOT NULL,
@@ -8,6 +9,7 @@ CREATE TABLE IF NOT EXISTS Client (
                               REFERENCES Contract (ContractId) 
 );
 
+--Creates The Contract Table
 CREATE TABLE IF NOT EXISTS Contract (
     ContractId        INTEGER PRIMARY KEY,
     ContractContact   TEXT    NOT NULL,
@@ -16,12 +18,15 @@ CREATE TABLE IF NOT EXISTS Contract (
     TaxStatus         TEXT
 );
 
+--Creates The Consultant Table
 CREATE TABLE IF NOT EXISTS Consultant (
     ConsultantId      INTEGER PRIMARY KEY,
     ConsultantName    TEXT    NOT NULL, 
     ConsultantAddress TEXT
 );
 
+--Creates The Engagement Table and references both the Client Table and the Consultant Table
+--with the ClientId and ConsultantId both being the foreign keys
 CREATE TABLE IF NOT EXISTS Engagement (
     EngagementId      INTEGER PRIMARY KEY,
     ClientId          INTEGER NOT NULL
@@ -32,17 +37,19 @@ CREATE TABLE IF NOT EXISTS Engagement (
     BillableTime      TEXT
 );
 
+--Creates The Bills Table and references the Engagement Table with the EngagementId being the foreign key
 CREATE TABLE IF NOT EXISTS Bills (
     BillsId           INTEGER PRIMARY KEY,
     EngagementId      INTEGER NOT NULL
                               REFERENCES Engagement (EngagementId),
-    BillsDate         TEXT,
+    BillsDate         DATE,
     BillsAddress      TEXT    NOT NULL,
     BillingContact    TEXT    NOT NULL,
     PayAmount         DECIMAL NOT NULL,
     PayDueDate        DATE
 );
 
+--Creates The ReceivedPay Table and references the Bills Table with the BillsId being the foreign key
 CREATE TABLE IF NOT EXISTS ReceivedPay (
     ReceivedPayId  INTEGER PRIMARY KEY,
     BillsId        INTEGER NOT NULL
@@ -51,17 +58,69 @@ CREATE TABLE IF NOT EXISTS ReceivedPay (
     DateReceived   DATE
 );
 
+--Populates the Consultant table with employee data
 INSERT INTO Consultant (ConsultantId, ConsultantName, ConsultantAddress) VALUES
-('1', 'Bruce Wayne', '123 Wayne Manor'),
-('2', 'Clark Kent', '62 Metropolis'),
-('3', 'Doc Brown', '1985 Hill Valley'),
-('4', 'Freddie Mercury', '39 Queen Road'),
-('5', 'Ozzy Osbourne', 'Crazytrain St.');
+('101', 'Bruce Wayne', '123 Wayne Manor'),
+('102', 'Clark Kent', '62 Metropolis'),
+('103', 'Doc Brown', '1985 Hill Valley'),
+('104', 'Freddie Mercury', '39 Queen Road'),
+('105', 'Ozzy Osbourne', 'Crazytrain St.');
 
+--Populates the Contract Table. I inserted data into this table first 
+--so the Client table could recognize the ContractId foreign key without failing
+INSERT INTO Contract (ContractId, ContractContact, ContractDetails, PaymentTerms, Taxstatus) VALUES
+(1, '123' , 'Completed as soon as possible', 'Payment end of month', 'Married'), 
+(2, '234' , 'Completed as soon as possible', 'Payment seven days after invoice date', 'Unmarried'),
+(3, '345' , 'Completed as soon as possible', 'Payment end of month', 'Married'),
+(4, '445' , 'Completed as soon as possible', 'Payment 10 days after invoice date', 'Married'), 
+(5, '567' , 'Completed as soon as possible', 'Payment seven days after invoice date', 'Married');
+
+--Populates the Client table with the clients' information
 INSERT INTO Client (ClientId, CompanyName, CompanyAddress, Phone, Email, ContractId) VALUES 
-('201', 'ACME Corp', 'Warner Brothers Blvd', '123-1111', 'looneytunes@acme.com', '1'),
-('202', 'Brawndo', 'Idiocracy Lane', '426-3862', 'electrolytes@gmail.com', '2'),
-('203', 'Lexcorp', '333 Metropolis', '555-1945', 'lexluthor@lexcorp.org', '3'),
-('204', 'Planet Express', '3001 New New York', '255-2525', 'Proffarnsworth@gmail.com', '4'),
-('205', 'Skynet', '1997 Arnold Ave', '888-0088', 't1000@skynet.org', '5');
+('201', 'ACME Corp', '222 Warner Brothers Blvd', '123-1111', 'looneytunes@acme.com',1),
+('202', 'Brawndo', '889 Idiocracy Lane', '426-3862', 'electrolytes@gmail.com',2),
+('203', 'Lexcorp', '333 Metropolis', '555-1945', 'lexluthor@lexcorp.org',3),
+('204', 'Planet Express', '3001 New York', '255-2525', 'Proffarnsworth@gmail.com',4),
+('205', 'Skynet', '1997 Arnold Ave', '888-0088', 't1000@skynet.org',5);
 
+--Populates the Engagement table with client/consultant data. It references both 
+--Client and Consultant tables using their Id's
+INSERT INTO Engagement (EngagementId, ClientId, ConsultantId, EngagementType, BillableTime) VALUES
+('301', 201, 101, 'Project Management', '10h'),
+('302', 202, 102, 'Data Analysis', '5h'),
+('303', 203, 103, 'Market Research', '7h'),
+('304', 204, 104, 'Data Analysis', '5h'),
+('305', 205, 105, 'Project Management', '10h');
+
+--Populates the Bills table with billing information
+--I made the BillsDate and PayDueDate dates based on the PaymentTerms in the Contract table
+INSERT INTO Bills (BillsId, EngagementId, BillsDate, BillsAddress, BillingContact, PayAmount, PayDueDate) VALUES
+('401', 301, '2018-12-01', '222 Warner Brothers Blvd', 'Wile E. Coyote', '2345.00', '2018-12-31'),
+('402', 302, '2018-12-03', '889 Idiocracy Lane', 'President Camacho', '1055.00', '2018-12-10'),
+('403', 303, '2018-12-05', '333 Metropolis', 'Lex Luthor', '1890.00', '2018-12-31'),
+('404', 304, '2018-12-08', '3001 New York', 'Professor Farnsworth', '1055.00', '2018-12-18'),
+('405', 305, '2018-12-13', '1997 Arnold Ave', 'Sarah Connor', '2333.00', '2018-12-20');
+
+--populates the ReceivedPay table with payment information
+INSERT INTO ReceivedPay (ReceivedPayId, BillsId, AmountReceived, DateReceived) VALUES
+('501', 402, '1055.00', '2018-12-10'),
+('502', 404, '1055.00', '2018-12-17'),
+('503', 401, '2345.00', '2018-12-19'),
+('504', 405, '2333.00', '2018-12-20'),
+('505', 403, '1890.00', '2018-12-28');
+
+--List all customers with outstanding balances, when the bill was submitted, and how much is owed.
+CREATE VIEW [CustomerBalances] AS
+SELECT Bills.BillingContact, ReceivedPay.DateReceived, Bills.PayAmount FROM Bills 
+    INNER JOIN ReceivedPay ON Bills.BillsId=ReceivedPay.BillsId;
+
+--List all customer engagements that have been paid, and the total amount paid per customer.
+CREATE VIEW [EngagementPayments] AS
+SELECT Bills.BillingContact AS "Customer", ReceivedPay.AmountReceived AS "Amount Paid" FROM Bills
+    JOIN
+         ReceivedPay ON Bills.BillsId=ReceivedPay.BillsId;
+
+--List every engagement with each customer, what the engagement was for and the cost of each engagement (whether paid or not).
+CREATE VIEW [CustomerEngagements] AS
+SELECT Engagement.EngagementId, Engagement.EngagementType, Bills.PayAmount FROM Engagement
+    INNER JOIN Bills ON Engagement.EngagementId=Bills.EngagementId;
