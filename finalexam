@@ -7,9 +7,16 @@ CREATE TABLE IF NOT EXISTS Projects (
 );
 
 CREATE TABLE IF NOT EXISTS Tasks (
-
+    TasksId          INTEGER PRIMARY KEY,
+    RequiredTime     TIME,
+    CompletionTime   TIME,
+    Taskstatus       TEXT,
+    TeammatesID      INTEGER NOT NULL
+                             REFERENCES Teammates (TeammatesId)
 );
 
 CREATE TABLE IF NOT EXISTS Teamates (
-
+    TeammatesId      INTEGER PRIMARY KEY,
+    Timespent        TIME,
+    Title            TEXT
 );
