@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS Projects (
+    ProjectsId        INTEGER PRIMARY KEY,
+    LeadTeamMember    TEXT    NULL,
+    ProjectStatus     TEXT,
+    TasksId           Integer NOT NULL
+                              REFERENCES Tasks (TasksId) 
+);
+
+CREATE TABLE IF NOT EXISTS Tasks (
+
+);
+
+CREATE TABLE IF NOT EXISTS Teamates (
+
+);
