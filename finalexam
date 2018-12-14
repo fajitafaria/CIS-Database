@@ -1,22 +1,57 @@
+--Creates Projects Table
 CREATE TABLE IF NOT EXISTS Projects (
-    ProjectsId        INTEGER PRIMARY KEY,
-    LeadTeamMember    TEXT    NULL,
-    ProjectStatus     TEXT,
-    TasksId           Integer NOT NULL
-                              REFERENCES Tasks (TasksId) 
+    ProjectsId         INTEGER PRIMARY KEY,
+    TasksId            INTEGER NOT NULL
+                               REFERENCES Tasks (TasksId),
+    ProjectDescription TEXT    NOT NULL,
+    ProjectStatus      TEXT    NOT NULL,
+    ProjectLead        TEXT   
 );
 
+--Creates Tasks Table
 CREATE TABLE IF NOT EXISTS Tasks (
-    TasksId          INTEGER PRIMARY KEY,
-    RequiredTime     TIME,
-    CompletionTime   TIME,
-    Taskstatus       TEXT,
-    TeammatesID      INTEGER NOT NULL
-                             REFERENCES Teammates (TeammatesId)
+    TasksId            INTEGER PRIMARY KEY,
+    TeammatesID        INTEGER NOT NULL
+                               REFERENCES Teammates (TeammatesId),
+    TaskDescription    TEXT    NOT NULL,
+    RequiredTime       TIME    NOT NULL,
+    CompletionTime     TIME,
+    Taskstatus         TEXT    NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS Teamates (
-    TeammatesId      INTEGER PRIMARY KEY,
-    Timespent        TIME,
-    Title            TEXT
+--Creates Teammates Table
+CREATE TABLE IF NOT EXISTS Teammates (
+    TeammatesId        INTEGER PRIMARY KEY,
+    Name               TEXT    NOT NULL,
+    Timespent          TIME    NOT NULL,
+    Title              TEXT
 );
+
+-- Populates data into the Teammates Table. 
+--I populated this table first to avoid any conflicting foreign key errors.
+INSERT INTO Teammates (TeammatesId, Name, TimeSpent, Title) VALUES 
+('101', 'Jim Carrey', '03:30:00', 'Project Lead'),
+('102', 'Tom Hanks', '01:25:00', 'Project Lead'),
+('103', 'Charlie Day', '05:20:00', 'Project Lead');
+
+--Populates data into the Tasks Table. 
+--I included a null value, because the task is incomplete.
+INSERT INTO Tasks (TasksId, TeammatesId, TaskDescription, RequiredTime, CompletionTIme, TaskStatus) VALUES 
+('1', 101, 'Network Maintenance', '04:00:00', '03:30:00', 'Complete'),
+('2', 102, 'Update System', '03:00:00', null, 'Incomplete'),
+('3', 103, 'Fix Bugs/Glitches', '06:00:00', '05:20:00', 'Complete');
+
+--Populates data into the Projects Table
+INSERT INTO Projects (ProjectsId, TasksId, ProjectDescription, ProjectStatus, ProjectLead) VALUES 
+('401', 1, 'Network Maintenance', 'Complete', 'Jim Carrey'),
+('402', 2, 'System Update', 'Incomplete', 'Tom Hanks'),
+('403', 3, 'Debugging', 'Complete', 'Charlie Day');
+
+--Provides one view of how much time each team mate spent on each project and whether that project is complete or not.
+--I needed to connect all 3 tables, so I joined the teammates table with The Tasks Table with the TasksId
+--Then I connected the Projects table using a JOIN with the same TasksId
+CREATE VIEW [TotalProjectTime] AS
+SELECT Teammates.Name, Projects.ProjectDescription, Teammates.TimeSpent, 
+Projects.ProjectStatus FROM Teammates
+    JOIN Tasks ON Teammates.TeammatesId = Tasks.TeammatesId
+        JOIN Projects ON Tasks.TasksId = Projects.TasksId;
